@@ -1,0 +1,101 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bioreason-pro"
+version = "0.1.0"
+description = "BioReason-Pro 2: protein function prediction with multimodal reasoning"
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+# Shared by both environments. Training and inference pin different torch / transformers stacks,
+# so those live in the `train` and `eval` extras below.
+dependencies = [
+    "accelerate",
+    "datasets",
+    # esm 3.4.0 must be installed separately with --no-deps (README, Setup): it pins torch 2.11
+    # and transformers<5, which neither stack meets. --no-deps strips esm's own requirements, so
+    # the ones we actually need are re-declared here.
+    "biopython",        # Bio.PDB, imported directly by bioreason2/dataset/cafa5/collate.py
+    "biotite>=1.0,<2",  # tested with 1.x; biotite 2 is untested with esm
+    "einops",
+    "msgpack-numpy",
+    "scikit-learn",
+    "tenacity",
+    "attrs",
+    "cloudpathlib",
+    "brotli",
+    "zstd",
+    "goatools",
+    "colorama",
+    # flash-attn must be installed separately: pip install flash-attn --no-build-isolation
+    "typing-extensions",
+    "triton",
+    "torch_geometric",
+    "networkx",
+    "obonet",
+    "huggingface_hub",
+    "safetensors",
+    "requests",
+    "tqdm",
+    "numpy",
+    "pandas",
+    "pyarrow",
+]
+
+[project.optional-dependencies]
+# SFT and checkpoint conversion (the training stack).
+train = [
+    "torch==2.7.1",
+    "torchvision==0.22.1",
+    "transformers==5.5.0",
+    "peft==0.20.0",
+    "fla-core==0.5.1",  # Qwen3.5's linear-attention kernels; without them a ~10x slower PyTorch path runs
+    "trl==0.19.1",
+    "pytorch_lightning==2.6.5",
+    "bitsandbytes",
+    "wandb",
+]
+# eval.py, scoring, judge and grounding (the environment every published eval ran in).
+eval = [
+    "vllm==0.27.1",
+    "transformers==5.15.1",
+]
+dev = [
+    "pytest",
+    "black",
+    "isort",
+    "mypy",
+]
+
+# RL only: registers the protein multimodal vLLM model in every vLLM process. Read from
+# installed metadata, so the RL env needs `pip install -e . --no-deps` (see bioreason2/rl/vllm_plugin.py).
+[project.entry-points."vllm.general_plugins"]
+bioreason2_protein_mm = "bioreason2.rl.vllm_plugin:register"
+
+[tool.setuptools.packages.find]
+include = ["bioreason2*"]
+
+[tool.setuptools.package-data]
+bioreason2 = ["dataset/go-basic.obo", "models/pl/*.jinja2"]
+
+[tool.black]
+line-length = 88
+target-version = ["py312"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true

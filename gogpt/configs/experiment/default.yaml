@@ -1,0 +1,86 @@
+# @package _global_
+# GO-GPT v2: the recipe of the released checkpoint (wanglab/gogpt-v2).
+experiment_name: gogpt_v2
+seed: 42
+
+pytorch:
+  matmul_precision: medium
+  enable_tf32: true
+
+model:
+  n_layer: 8
+  n_head: 12
+  n_embd: 900
+  block_size: 3072              # 2000 protein + up to 1000 GO tokens
+  bias: true
+  dropout: 0.08
+  use_gated_attention: true
+  use_rmsnorm: true
+  use_qk_norm: true
+  embed_model_path: facebook/esm2_t33_650M_UR50D
+  protein_embedding_dim: 1280
+  protein_layer_index: 27       # hidden_states[27] of ESM2-650M
+  max_protein_length: 2000
+
+data:
+  preprocessed_path: artifacts/preprocessed/v2   # relative paths are relative to gogpt/
+  # Precomputed ESM2 embeddings (scripts/precompute_embeddings.py). When null or the
+  # directory does not exist, ESM2 runs on the fly in every training step instead.
+  embedding_cache_dir: artifacts/embeddings/esm2_t33_650M_UR50D_l27
+  batch_size: 8
+  num_workers: 3
+  persistent_workers: true
+  prefetch_factor: 16
+  pin_memory: true
+
+training:
+  learning_rate: 3e-4
+  weight_decay: 0.2
+  betas: [0.9, 0.95]
+  warmup_fraction: 0.05
+  min_lr_ratio: 0.1
+  label_smoothing: 0.03
+  meap_mask_ratio: 0.15         # fraction of GO input tokens replaced by <pad>
+  val_max_new_tokens: 100
+
+trainer:
+  max_epochs: 100
+  devices: 4
+  accelerator: gpu
+  precision: bf16-mixed
+  strategy: ddp_find_unused_parameters_true   # the last block's protein-stream outputs never reach the loss
+  accumulate_grad_batches: 5                  # 4 GPUs x 8 x 5 = 160 examples per step
+  gradient_clip_val: 1.0
+  check_val_every_n_epoch: 10
+  num_sanity_val_steps: 0
+  log_every_n_steps: 100
+
+validation:
+  obo_file: data/go-basic.obo
+  ia_file: ../data/IA_CAFA6.tsv   # CAFA 6 information accretion; not shipped, scripts/data/download_assets.py fetches it
+
+resume:
+  checkpoint_path: null
+
+checkpoints:
+  - monitor: val_wf1
+    mode: max
+    save_top_k: 3
+    filename: best-{epoch:02d}-{val_wf1:.3f}
+    dirpath: checkpoints/best
+  - monitor: null
+    save_top_k: -1
+    every_n_epochs: 5
+    filename: epoch-{epoch:02d}
+    dirpath: checkpoints/periodic
+    save_on_train_epoch_end: true
+  - monitor: null               # the latest epoch, overwritten every epoch: resume from this
+    save_top_k: 1
+    filename: latest
+    dirpath: checkpoints
+    save_on_train_epoch_end: true
+
+wandb:
+  enabled: false
+  project: GO-GPT
+  name: ${experiment_name}_${now:%Y-%m-%d_%H-%M-%S}

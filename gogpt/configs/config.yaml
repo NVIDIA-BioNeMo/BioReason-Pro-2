@@ -1,0 +1,9 @@
+defaults:
+  - _self_
+  - experiment: default
+
+hydra:
+  run:
+    dir: artifacts/training/${experiment_name}/${now:%Y-%m-%d_%H-%M-%S}
+  job:
+    chdir: true

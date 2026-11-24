@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+.venv/
+venv/
+.env
+
+# Editors and OS
+.idea/
+.vscode/
+.DS_Store
+
+# The corpus (scripts/data/fetch_corpus.py), assets and checkpoints, and what is built from them
+/data/v2/
+/data/v2-ep75/
+/data/sft/
+/data/IA_CAFA6.tsv
+/assets/
+/ckpt/
+/cache/
+/skyrl/src/
+
+# Run outputs
+/results/
+/logs/
+/checkpoint_keys.txt
+/judge/
+/rl_data/
+/rl_runs/
+wandb/
+outputs/
+trainer_output/
+*.log
+*.out
+*.err
+*.pt

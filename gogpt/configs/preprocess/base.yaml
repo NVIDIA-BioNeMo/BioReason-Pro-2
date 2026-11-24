@@ -1,0 +1,32 @@
+# Training data for GO-GPT v2 (scripts/prepare_data.py).
+seed: 42
+
+# Source: the proteins and proteins_extra configs of wanglab/bioreason-pro-v2.
+hf_dataset: wanglab/bioreason-pro-v2
+hf_revision: null
+data_dir: null          # a local copy (holding proteins/ and proteins_extra/) instead of downloading
+
+obo_file: data/go-basic.obo          # GO release 2023-01-01, used for depth ordering
+embed_model_path: facebook/esm2_t33_650M_UR50D   # protein tokenizer
+
+label_tiers: [1, 2]     # training labels: tier-1 ∪ tier-2 (validation is always scored on tier-1)
+include_v1_vintage: true
+val_per_source:
+  proteins: 4000
+  extra: 4000
+
+min_freq: 20            # vocabulary: terms annotated on >= 20 training proteins, per aspect
+top_n_organisms: 200
+max_go_terms: 1000
+max_protein_length: 2000
+block_size: 3072        # must match model.block_size
+
+num_proc: 4
+limit_proteins: null    # smoke tests only: keep the first N proteins of each source
+output_dir: artifacts/preprocessed/v2
+
+hydra:
+  run:
+    dir: artifacts/preprocessing/${now:%Y-%m-%d_%H-%M-%S}
+  job:
+    chdir: false

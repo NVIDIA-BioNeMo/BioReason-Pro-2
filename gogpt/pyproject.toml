@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gogpt"
+version = "2.0.0"
+description = "GO-GPT: autoregressive Gene Ontology term prediction from protein sequence"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+# Inference only. Lower bounds are the oldest versions tested.
+dependencies = [
+    "torch>=2.6",
+    "transformers>=4.51",
+    "huggingface_hub>=0.23",
+    "safetensors>=0.4",
+    "numpy",
+]
+
+[project.optional-dependencies]
+# Data preparation, embedding precompute and training.
+train = [
+    "pytorch_lightning>=2.2",
+    "hydra-core>=1.3",
+    "omegaconf>=2.3",
+    "datasets>=2.18",
+    "pyarrow>=14",
+    "goatools>=1.4",
+    "obonet>=1.3",
+    "pandas",
+    "tqdm",
+    "wandb",
+]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-m 'not slow'"
+markers = [
+    "slow: downloads ESM2 or the released checkpoint (network, several GB)",
+]
