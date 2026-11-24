@@ -365,7 +365,7 @@ licenses are listed in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 
 ```bibtex
 @article{nainani2026biologicalreasoning,
-  author = {Nainani, Jatin and Pearce, Michael and Bigelow, Eric and Jain, Archa and Wang, Nicholas and Fallahpour, Adibvafa and Srinivasan, Savitha and Choi, Benedict and Seyed-Ahmadi, Arman and Idehpour, Parsa and Wilber, Jared and St. John, Peter and St. John, John and Wang, Bo and Rvachov, Timur and Goodarzi, Hani},
+  author = {Nainani, Jatin and Fallahpour, Adibvafa and Srinivasan, Savitha and Choi, Benedict and Seyed-Ahmadi, Arman and Pearce, Michael and Bigelow, Eric and Idehpour, Parsa and Wilber, Jared and St. John, Peter and St. John, John and Wang, Bo and Jain, Archa and Rvachov, Timur and Goodarzi, Hani and Wang, Nicholas},
   title = {Building stronger biological reasoning models},
   journal = {Goodfire Research},
   year = {2026},
